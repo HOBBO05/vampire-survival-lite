@@ -16,7 +16,7 @@ TILE_COLOR_2 = "#101010"
 
 # 경험치/보석 설정
 GEM_SIZE = 16
-GEM_XP_VALUE = 4
+GEM_XP_VALUE = 5
 XP_BAR_HEIGHT = 24
 XP_BASE_REQ = 50
 GEM_PICKUP_RADIUS = 60  # 최소 줍기 반경(픽셀)
@@ -29,6 +29,8 @@ POTION_SIZE = 18
 POTION_HEAL = 12
 POTION_DROP_CHANCE = 0.08
 POTION_PICKUP_RADIUS = 60
+POTION_IMG_NAMES = ["potion.png", "힐팩.png"]
+POTION_TARGET_SIZE = 40
 
 # 스프라이트 크기 조절(원본 유지하려면 SCALE=1.0, TARGET=None)
 SPRITE_TARGET_SIZE = None  # 픽셀로 강제 크기(가장 긴 변 기준). None이면 SCALE만 사용
@@ -176,6 +178,7 @@ class VampireSurvivorLite:
         self.dagger_image_left = self._load_first_image(base_dir, DAGGER_IMG_LEFT_NAMES, PROJECTILE_TARGET_SIZE, SPRITE_SCALE)
         self.dagger_image = self.dagger_image_right or self.dagger_image_left
         self.bible_image = self._load_first_image(base_dir, BIBLE_IMG_NAMES, BIBLE_TARGET_SIZE, SPRITE_SCALE)
+        self.potion_image = self._load_first_image(base_dir, POTION_IMG_NAMES, POTION_TARGET_SIZE, SPRITE_SCALE)
 
         # 플레이어 이미지 (같은 폴더의 player.png 사용)
         # SPRITE_TARGET_SIZE / SPRITE_SCALE 로 크기 조절 가능
@@ -352,18 +355,20 @@ class VampireSurvivorLite:
 
     # ===== 보스 투사체 =====
     def spawn_boss_bullets(self, boss):
-        base_angle = 0.0
-        for i in range(8):
-            ang = base_angle + (math.pi / 4) * i
-            vx = math.cos(ang) * BOSS_BULLET_SPEED
-            vy = math.sin(ang) * BOSS_BULLET_SPEED
-            self.boss_bullets.append({
-                "x": boss["x"],
-                "y": boss["y"],
-                "vx": vx,
-                "vy": vy,
-                "birth": self.game_time,
-            })
+        # 8방향 탄을 2번 발사 (두 번째는 살짝 오프셋)
+        for ring in range(2):
+            base_angle = 0.0 + (math.pi / 8) * ring
+            for i in range(8):
+                ang = base_angle + (math.pi / 4) * i
+                vx = math.cos(ang) * BOSS_BULLET_SPEED
+                vy = math.sin(ang) * BOSS_BULLET_SPEED
+                self.boss_bullets.append({
+                    "x": boss["x"],
+                    "y": boss["y"],
+                    "vx": vx,
+                    "vy": vy,
+                    "birth": self.game_time,
+                })
 
     def update_boss_bullets(self):
         if not self.boss_bullets:
@@ -948,10 +953,10 @@ class VampireSurvivorLite:
         while self.xp >= self.xp_to_next:
             self.xp -= self.xp_to_next
             self.level += 1
-            # 레벨이 오를수록 더 많이 필요 (기하급수적 성장)
-            factor = 1.5 ** (self.level - 1)
+            # 레벨이 오를수록 더 많이 필요 (완화 버전)
+            factor = 1.4 ** (self.level - 1)
             if self.level >= 3:
-                factor *= 1.6  # 3레벨 이후 요구 경험치 강화
+                factor *= 1.2  # 고레벨 보정은 약하게
             self.xp_to_next = int(XP_BASE_REQ * factor)
             if not self.level_up_active:
                 self.trigger_level_up()
@@ -1063,23 +1068,31 @@ class VampireSurvivorLite:
         for p in self.potions:
             sx = self.player_screen_x + (p["x"] - self.world_x)
             sy = self.player_screen_y + (p["y"] - self.world_y)
-            # 하트 모양: 두 원과 삼각형을 합친 형태의 좌표 다각형
-            x0 = sx - size / 2
-            y0 = sy - size / 4
-            x1 = sx + size / 2
-            y1 = sy + size / 2
-            points = [
-                sx, y1,          # 아래 꼭짓점
-                x0, sy,          # 왼쪽
-                sx, y0,          # 위쪽 중앙
-                x1, sy           # 오른쪽
-            ]
-            self.canvas.create_polygon(
-                points,
-                fill="#ff4d6d",
-                outline="#ff99ad",
-                smooth=True
-            )
+            if self.potion_image:
+                self.canvas.create_image(
+                    sx,
+                    sy,
+                    image=self.potion_image,
+                    anchor="center"
+                )
+            else:
+                # 하트 모양 폴백
+                x0 = sx - size / 2
+                y0 = sy - size / 4
+                x1 = sx + size / 2
+                y1 = sy + size / 2
+                points = [
+                    sx, y1,          # 아래 꼭짓점
+                    x0, sy,          # 왼쪽
+                    sx, y0,          # 위쪽 중앙
+                    x1, sy           # 오른쪽
+                ]
+                self.canvas.create_polygon(
+                    points,
+                    fill="#ff4d6d",
+                    outline="#ff99ad",
+                    smooth=True
+                )
 
     def draw_hp_bar(self):
         # 플레이어 발 밑에 HP 표시
@@ -1639,3 +1652,4 @@ def main():
 
 if __name__ == "__main__":
     main()  
+
