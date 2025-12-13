@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "VampireSurvivorLite", "VampireSurvivorLite\VampireSurvivorLite.pyproj", "{5B0C9323-8448-418A-80AB-3E2568BA307A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B0C9323-8448-418A-80AB-3E2568BA307A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B0C9323-8448-418A-80AB-3E2568BA307A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2C4C2D6B-DCA1-4667-93A7-30BAB3FCD462}
+	EndGlobalSection
+EndGlobal
